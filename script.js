@@ -4,6 +4,8 @@ console.log("hi");
 var c = document.getElementById("canvas");
 var ctx = c.getContext("2d");
 
+var score = 0
+
 var bgImage = new Image();
 bgImage.src = "images/bg.png";
 
@@ -13,22 +15,31 @@ copterImg.src = "images/copter.png";
 var coin = new Image();
 coin.src = "images/coin.png";
 
+var bird = new Image();
+bird.src = "images/bird.png";
 
 var acceleration = false;
 
+var running = true;
 
 function update() {
-  updateBackground();
-  updateCopter();
-  updateCoin()
+  if(running)
+    {
+        updateBackground();
+        updateCopter();
+        updateCoin();
+        updateBirds();
 
-  requestAnimationFrame(update)
+        requestAnimationFrame(update);
+    }
 }
 
 function draw() {
   drawBackground();
   drawCopter();
-  drawCoin()
+  drawCoin();
+  drawScore();
+  drawBirds();
 
   requestAnimationFrame(draw);
 }
@@ -59,7 +70,7 @@ var copterX = 30;
 var copterY = 200;
 
 var copterWidth = 131;
-var copterheight = 34;
+var copterHeight = 34;
 
 var dy = 0;
 var speed = 1.1;
@@ -89,12 +100,17 @@ function updateCopter() {
     dy = 0;
     copter = 0;
   }
+
+  if(copterY + copterHeight > 480)
+   {
+       running = false;
+   }
 }
 
 function drawCopter() {
   ctx.drawImage(copterImg, copterWidth*frameIndex, 0,
-                 copterWidth, copterheight, copterX, copterY,
-                  copterWidth, copterheight);
+                 copterWidth, copterHeight, copterX, copterY,
+                  copterWidth, copterHeight);
 }
 
 
@@ -206,4 +222,98 @@ function updateCoin() {
     }
 
     m++;
+}
+
+//BIRDS
+var birdWidth = 101;
+var birdHeight = 110;
+
+var birds = [];
+
+function addBirds() {
+    var randomNumber = Math.floor(Math.random() * (450 - 10)) + 10;
+
+    birds.push(860);
+    birds.push(randomNumber);
+    birds.push(0);
+}
+
+function drawBirds() {
+    var i = 0;
+    while (birds != undefined && i < birds.length) {
+        ctx.drawImage(bird, 0, birds[i + 2] * birdHeight, birdWidth, birdHeight, birds[i], birds[i + 1], birdWidth, birdHeight);
+        i = i + 3;
+    }
+}
+
+var db = new Date();
+var db1 = db.getTime();
+
+var co = 0;
+
+function updateBirds() {
+    var f = new Date();
+
+    //time difference in seconds
+    diff = (f.getTime() - db1) / 1000;
+
+    if (diff > 8) {
+        var temp = new Date();
+        db1 = temp.getTime();
+        addBirds();
+    }
+
+    var i = 0;
+    while (birds != undefined && i < birds.length) {
+        if (co % 7 == 0) {
+            birds[i + 2] = birds[i + 2] + 1;
+            birds[i + 2] = birds[i + 2] % 4;
+            co = 0;
+        }
+
+        birds[i] = birds[i] - 4;
+
+
+        if(birds[i] <= -10){
+            var tempCount = i;
+            var temp1 = birds[i];
+            var temp2 = birds[i+1];
+            var temp3 = birds[i+2];
+
+            while(tempCount < birds.length){
+                birds[tempCount] = birds[tempCount+3];
+                birds[tempCount+1] = birds[tempCount+4];
+                birds[tempCount+2] = birds[tempCount+5];
+                tempCount = tempCount + 3;
+            }
+
+            birds.pop();
+            birds.pop();
+            birds.pop();
+        }
+
+
+
+        if (copterX < birds[i] + birdWidth &&
+            copterX + copterWidth > birds[i] &&
+            copterY < birds[i+1] + birdHeight &&
+            copterHeight + copterY > birds[i+1]) {
+
+                running = false;
+
+            }
+
+        i = i + 3;
+
+    }
+
+    co++;
+}
+
+
+// Draw Score
+function drawScore() {
+    ctx.font="25px Georgia";
+    ctx.textAlign="right";
+    ctx.fillText("Score : " + score, 846, 25);
 }
