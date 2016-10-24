@@ -10,6 +10,8 @@ bgImage.src = "images/bg.png";
 var copterImg = new Image();
 copterImg.src = "images/copter.png";
 
+var acceleration = false;
+
 
 function update() {
   updateBackground();
@@ -53,15 +55,53 @@ var copterY = 200;
 var copterWidth = 131;
 var copterheight = 34;
 
+var dy = 0;
+var speed = 1.1;
+
 var frameIndex = 0;
 
 function updateCopter() {
   frameIndex++;
   frameIndex = frameIndex%3;
+
+  if(acceleration){
+    dy = dy - 0.5;
+  } else {
+    dy = dy + 0.5;
+  }
+
+  if( dy > 14) {
+    dy = 14;
+  }
+  if( dy < -14) {
+    dy = -14;
+  }
+
+  copterY = copterY + dy*speed;
+
+  if(copterY < 0) {
+    dy = 0;
+    copter = 0;
+  }
 }
 
 function drawCopter() {
   ctx.drawImage(copterImg, copterWidth*frameIndex, 0,
                  copterWidth, copterheight, copterX, copterY,
                   copterWidth, copterheight);
+}
+
+
+// Handling keyboard input
+
+document.onkeydown = function (event) {
+  if(event.keyCode == 32 ) {
+    acceleration = true;
+  }
+}
+
+document.onkeyup = function (event) {
+  if(event.keyCode == 32 ) {
+    acceleration = false;
+  }
 }
